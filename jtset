@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+import sys, os, heapq
+
+USAGE = """
+Usage: %s <option>
+       -u <file>    uniquely output lines that are both in <file> and stdin
+       -i <file>    output lines from stdin that are in <file>
+       -d <file>    output lines from stdin that are not in <file>
+       -c           functionally equivalent to sort | uniq -c | sort -n
+""".strip()
+
+def main(argv):
+    if len(argv) == 2 and argv[1] == "-c":
+        line_counts = {}
+        heap = []
+        for line in sys.stdin:
+            if not line_counts.has_key(line):
+                line_counts[line] = 1
+            else:
+                line_counts[line] += 1
+            heapq.heappush(heap, (line_counts[line], line))
+        while heap:
+            count, line = heapq.heappop(heap)
+            if line_counts[line] != count: continue
+            sys.stdout.write("%d\t%s" % (count, line))
+        return 0
+    if len(argv) != 3 or argv[1] not in ("-u", "-d", "-i") or \
+            not os.path.isfile(argv[2]):
+        print >>sys.stderr, USAGE % argv[0]
+        return -1
+    inset = set(file(argv[2]).readlines())
+    if argv[1] == "-u":
+        for line in sys.stdin:
+            inset.add(line)
+        for line in inset:
+            sys.stdout.write(line)
+        return 0
+    if argv[1] == "-i":
+        for line in sys.stdin:
+            if line in inset:
+                sys.stdout.write(line)
+        return 0
+    if argv[1] == "-d":
+        for line in sys.stdin:
+            if line not in inset:
+                sys.stdout.write(line)
+        return 0
+    print "programmer error"
+    return -1
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

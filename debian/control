@@ -1,0 +1,18 @@
+Source: jttools
+Section: non-free/utils
+Priority: optional
+Maintainer: JT <hello@jtolds.com>
+Build-Depends: debhelper (>= 4), cdbs
+Standards-Version: 3.6.1
+
+Package: jtset
+Architecture: all
+Depends: jttools
+Description: Dummy package. Package now called jttools
+
+Package: jttools
+Architecture: all
+Depends: python
+Replaces: jtset
+Provides: jtset, jtnum, jttools
+Description: Provides two tools - jtset and jtnum. jtset allows for the set union, intersection, and difference of lines in files and stdin. jtnum allows for basic statistics reporting on aggregate data fed from stdin.

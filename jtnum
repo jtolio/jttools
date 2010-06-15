@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+import sys, math
+
+USAGE = """
+Usage: %s <options>
+    output types:
+        -s  sum
+        -a  mean
+        -m  median
+        -v  variance
+        -d  stddev
+        -n  minimum
+        -x  maximum
+    options:
+        -f  if provided, numbers are parsed as floating-point (integer default)
+        -b  if provided, variance and stddev are bessel-corrected
+    NOTE: all non-numerical lines are ignored
+""".strip()
+VALID_ARGS = set(("s", "a", "m", "v", "d", "n", "x"))
+OPTIONS = set(("f", "b"))
+
+def main(argv):
+    opts = {}
+    def usage():
+        print >>sys.stderr, USAGE % argv[0]
+        return -1
+    for arg in argv[1:]:
+        if arg[0] != "-" or len(arg) <= 1: return usage()
+        for char in arg[1:]:
+            if char not in VALID_ARGS and char not in OPTIONS: return usage()
+            opts[char] = True
+
+    do_something = False
+    for key in opts:
+        if key not in OPTIONS:
+            do_something = True
+            break
+    if not do_something: return usage()
+
+    def getnums():
+        parser = opts.has_key('f') and float or int
+        for line in (y for y in (x.strip() for x in sys.stdin) if y):
+            try: yield parser(line)
+            except: continue
+
+    nums = []
+    mean = 0
+    var = 0
+    sum_ = 0
+    M2 = 0
+    any_nums = False
+    min_ = float('inf')
+    max_ = float('-inf')
+
+    if opts.has_key("m"): median_calculate = lambda num: nums.append(num)
+    else: median_calculate = lambda num: None
+
+    for n, num in enumerate(getnums()):
+        any_nums = True
+        delta = num - mean
+        mean += float(delta) / (n + 1)
+        M2 += delta * (num - mean)
+        sum_ += num
+        median_calculate(num)
+        if min_ >= num: min_ = num
+        if max_ <= num: max_ = num
+
+        if opts.has_key('b') and n > 0:
+            var = float(M2) / n
+        else:
+            var = float(M2) / (n + 1)
+
+    if opts.has_key("s"):
+        sys.stdout.write("sum: %s " % sum_)
+    if opts.has_key("a") and any_nums:
+        sys.stdout.write("mean: %s " % mean)
+    if opts.has_key("m") and nums:
+        nums.sort()
+        sys.stdout.write("median: %s " % nums[len(nums) / 2])
+    if opts.has_key("d") and any_nums:
+        sys.stdout.write("stddev: %s " % math.sqrt(var))
+    if opts.has_key("v") and any_nums:
+        sys.stdout.write("variance: %s " % var)
+    if opts.has_key("n") and any_nums:
+        sys.stdout.write("min: %s " % min_)
+    if opts.has_key("x") and any_nums:
+        sys.stdout.write("max: %s " % max_)
+
+    sys.stdout.write("\n")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

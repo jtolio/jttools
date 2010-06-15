@@ -1,0 +1,11 @@
+jttools (0.1.2) unstable; urgency=low
+
+  * screwed up debian conflicts/replaces etc
+
+ -- JT <hello@jtolds.com>  Mon, 14 Jun 2010 19:35:00 -0700
+
+jttools (0.1.0) unstable; urgency=low
+
+  * combining jtnum and jtset tools into one package
+
+ -- JT <hello@jtolds.com>  Mon, 14 Jun 2010 19:07:00 -0700
