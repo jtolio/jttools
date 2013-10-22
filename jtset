@@ -29,21 +29,28 @@ def main(argv):
             not os.path.isfile(argv[2]):
         print >>sys.stderr, USAGE % argv[0]
         return -1
-    inset = set(file(argv[2]).readlines())
+    inset = set()
+    for line in file(argv[2]).readlines():
+        line = line.strip()
+        if line:
+            inset.add(line)
     if argv[1] == "-u":
         for line in sys.stdin:
-            inset.add(line)
+            line = line.strip()
+            if line:
+                inset.add(line)
         for line in inset:
-            sys.stdout.write(line)
+            sys.stdout.write(line + "\n")
         return 0
     if argv[1] == "-i":
         for line in sys.stdin:
-            if line in inset:
+            if line.strip() in inset:
                 sys.stdout.write(line)
         return 0
     if argv[1] == "-d":
         for line in sys.stdin:
-            if line not in inset:
+            line_stripped = line.strip()
+            if line_stripped and line_stripped not in inset:
                 sys.stdout.write(line)
         return 0
     print "programmer error"
